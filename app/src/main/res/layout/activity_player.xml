@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".Player">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="290dp"
-        android:layout_height="253dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/music" />
 
     <TextView
         android:id="@+id/songTitle"
@@ -30,11 +21,13 @@
         android:textColor="@color/design_default_color_primary_dark"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
-    <SeekBar
+    <org.florescu.android.rangeseekbar.RangeSeekBar
+
+        app:alwaysActive="true"
         android:id="@+id/mSeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -106,36 +99,9 @@
         app:layout_constraintStart_toEndOf="@+id/playIcon"
         app:layout_constraintTop_toBottomOf="@+id/mSeekBar" />
 
-    <ImageView
-        android:id="@+id/repeatIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="68dp"
-        android:layout_marginLeft="68dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/repeat_default"
-        app:layout_constraintBottom_toTopOf="@+id/mSeekBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/songTitle"
-        app:layout_constraintVertical_bias="0.824" />
 
-    <ImageView
-        android:id="@+id/suffleIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="76dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="16dp"
-        android:src="@drawable/suffle_default"
-        app:layout_constraintBottom_toTopOf="@+id/mSeekBar"
-        app:layout_constraintEnd_toStartOf="@+id/curListIcon"
-        app:layout_constraintStart_toEndOf="@+id/repeatIcon"
-        app:layout_constraintTop_toBottomOf="@+id/songTitle"
-        app:layout_constraintVertical_bias="0.656" />
+
+
 
     <ImageView
         android:id="@+id/curListIcon"

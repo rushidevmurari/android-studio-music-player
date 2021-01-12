@@ -16,12 +16,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.florescu.android.rangeseekbar.RangeSeekBar;
+
 import java.io.File;
 import java.util.ArrayList;
 
 public class Player extends AppCompatActivity {
-    SeekBar mSeekBar;
+    RangeSeekBar mSeekBar;
     TextView songTitle;
+    private Runnable r;
     ArrayList<File> allSongs;
     static MediaPlayer mMediaPlayer;
     int position;
@@ -32,8 +35,7 @@ public class Player extends AppCompatActivity {
     ImageView nextIcon;
     Intent playerData;
     Bundle bundle;
-    ImageView repeatIcon;
-    ImageView suffleIcon;
+
     ImageView curListIcon;
 
 
@@ -51,8 +53,7 @@ public class Player extends AppCompatActivity {
         prevIcon = findViewById(R.id.prevIcon);
         nextIcon = findViewById(R.id.nextIcon);
 
-        repeatIcon = findViewById(R.id.repeatIcon);
-        suffleIcon = findViewById(R.id.suffleIcon);
+
         curListIcon = findViewById(R.id.curListIcon);
 
 
@@ -129,10 +130,47 @@ public class Player extends AppCompatActivity {
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                String totalTime = createTimeLabel(mMediaPlayer.getDuration());
-                totTime.setText(totalTime);
-                mSeekBar.setMax(mMediaPlayer.getDuration());
-                mMediaPlayer.start();
+
+                int duration = mp.getDuration() / 1000;
+                //initially set the left TextView to "00:00:00"
+                curTime.setText("00:00:00");
+                //initially set the right Text-View to the video length
+                //the getTime() method returns a formatted string in hh:mm:ss
+                totTime.setText(getTime(mp.getDuration() / 1000));
+                //this will run he ideo in loop i.e. the video won't stop
+                //when it reaches its duration
+
+
+                mp.setLooping(true);
+
+                mSeekBar.setRangeValues(0, duration);
+                mSeekBar.setSelectedMinValue(0);
+                mSeekBar.setSelectedMaxValue(duration);
+                mSeekBar.setEnabled(true);
+
+                mSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener() {
+                    @Override
+                    public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
+                        //we seek through the video when the user drags and adjusts the seekbar
+                        mMediaPlayer.seekTo((int) minValue * 1000);
+                        //changing the left and right TextView according to the minValue and maxValue
+                        curTime.setText(getTime((int) bar.getSelectedMinValue()));
+                        totTime.setText(getTime((int) bar.getSelectedMaxValue()));
+
+                    }
+                });
+                final Handler handler = new Handler();
+                handler.postDelayed(r = new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (mMediaPlayer.getCurrentPosition() >= mSeekBar.getSelectedMaxValue().intValue() * 1000)
+                            mMediaPlayer.seekTo(mSeekBar.getSelectedMinValue().intValue() * 1000);
+                        handler.postDelayed(r, 1000);
+                    }
+                }, 1000);
+
+
                 playIcon.setImageResource(R.drawable.ic_pause_black_24dp);
 
             }
@@ -156,62 +194,32 @@ public class Player extends AppCompatActivity {
             }
         });
 
-
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                if (fromUser) {
-                    mMediaPlayer.seekTo(progress);
-                    mSeekBar.setProgress(progress);
-                }
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
+mSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener() {
+    @Override
+    public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (mMediaPlayer != null) {
-                    try {
-//                        Log.i("Thread ", "Thread Called");
-                        // create new message to send to handler
-                        if (mMediaPlayer.isPlaying()) {
-                            Message msg = new Message();
-                            msg.what = mMediaPlayer.getCurrentPosition();
-                            handler.sendMessage(msg);
-                            Thread.sleep(1000);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+
+        curTime.setText(getTime((int) bar.getSelectedMinValue()));
+        totTime.setText(getTime((int) bar.getSelectedMaxValue()));
     }
 
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-//            Log.i("handler ", "handler called");
-            int current_position = msg.what;
-            mSeekBar.setProgress(current_position);
-            String cTime = createTimeLabel(current_position);
-            curTime.setText(cTime);
-        }
-    };
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+});
+
+
+
+
+    }
+
+
 
 
     private void play() {
@@ -237,17 +245,12 @@ public class Player extends AppCompatActivity {
 
 
 
-    public String createTimeLabel(int duration) {
-        String timeLabel = "";
-        int min = duration / 1000 / 60;
-        int sec = duration / 1000 % 60;
-
-        timeLabel += min + ":";
-        if (sec < 10) timeLabel += "0";
-        timeLabel += sec;
-
-        return timeLabel;
-
-
+   
+    private String getTime(int seconds) {
+        int hr = seconds / 3600;
+        int rem = seconds % 3600;
+        int mn = rem / 60;
+        int sec = rem % 60;
+        return String.format("%02d", hr) + ":" + String.format("%02d", mn) + ":" + String.format("%02d", sec);
     }
 }
